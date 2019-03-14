@@ -11,16 +11,13 @@ exports.getById = async function (req, res) {
             res.json("Not Found");
             return;
         };
-        delete result[0].password;
-        delete result[0].user_id;
-        delete result[0].auth_token;
-        delete result[0].profile_photo_filename;
+
         authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
             if (authResult == null || authResult[0].user_id != user_id) {
                 delete result[0].email;
             }
             res.status(200);
-            res.json(result);
+            res.json(result[0]);
         });
     });
 };
@@ -60,7 +57,7 @@ exports.create = async function (req, res) {
             return;
         }
         res.status(201);
-        res.json(result);
+        res.json(result[0]);
     })
 };
 
@@ -106,18 +103,16 @@ exports.login = async function (req, res) {
 
     values.push(hash.digest("hex"));
 
-    console.log(values);
-
     if (isUsernameLogin) {
         User.getAuthUsername(values, function (result) {
             res.status(200);
-            res.json(result);
+            res.json(result[0]);
             return;
         })
     } else {
         User.getAuthEmail(values, function (result) {
             res.status(200);
-            res.json(result);
+            res.json(result[0]);
             return;
         });
     };

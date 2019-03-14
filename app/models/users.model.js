@@ -2,7 +2,7 @@ const db = require('../../config/db');
 
 
 exports.getOne = function(user_id, done) {
-    db.getPool().query("SELECT * FROM User WHERE user_id = ?;", user_id, function(err, rows) {
+    db.getPool().query("SELECT username, email, given_name, family_name FROM User WHERE user_id = ?;", user_id, function(err, rows) {
         if (err) return done(err);
         return done(rows);
     })
@@ -11,7 +11,10 @@ exports.getOne = function(user_id, done) {
 exports.insert = function(values, done) {
     db.getPool().query("INSERT INTO User (username, email, given_name, family_name, password) VALUES (?, ?, ?, ?, ?);", values, function(err, result) {
         if (err) return done(err);
-        return done(result);
+        db.getPool().query("SELECT user_id FROM User WHERE username = ?", values[0], function(err, result) {
+            if (err) return done(err);
+            return done(result);
+        });
     });
 };
 
