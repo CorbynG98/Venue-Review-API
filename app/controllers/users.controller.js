@@ -91,7 +91,17 @@ exports.update = async function (req, res) {
     let queryPart = ""
     for (let value in user_data) {
         if (user_data[value] != undefined) {
+            if (user_data[value] == "") {
+                res.status(400);
+                res.json("Bad Request");
+                return;
+            }
             if (value == "password") {
+                if (typeof user_data["password"] != "string") {
+                    res.status(400);
+                    res.json("Bad Request");
+                    return;
+                }
                 const hash = crypto.createHash("sha256");
                 hash.update(user_data["password"]);
                 queryPart += value + " = " + hash.digest("hex") + ", ";
