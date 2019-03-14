@@ -79,7 +79,60 @@ exports.create = async function (req, res) {
 };
 
 exports.update = async function (req, res) {
-    return null;
+    let user_id = req.params.user_id;
+    let user_data = {
+        "username": req.body.username,
+        "email": req.body.email,
+        "givenName": req.body.givenName,
+        "familyName": req.body.familyName,
+        "password": req.body.password
+    };
+
+    let queryPart = ""
+    for (let value in user_data) {
+        if (user_data[value] != undefined) {
+            if (value == "password") {
+                const hash = crypto.createHash("sha256");
+                hash.update(user_data["password"]);
+                queryPart += value + " = " + hash.digest("hex") + ", ";
+            } else {
+                queryPart += value + " = " + user_data[value] + ", ";
+            };
+        };
+    };
+
+    if (queryPart == "") {
+        res.status(400);
+        res.json("Bad Request");
+        return;
+    }
+
+    queryPart = queryPart.substring(0, queryPart.length - 2);
+
+    authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
+        if (authResult == null) {
+            res.status(401);
+            res.json("Unauthorized");
+            return;
+        } else if (authResult[0].user_id != user_id) {
+            res.status("403");
+            res.json("Forbidden");
+            return;
+        }
+        let values = [
+            [queryPart],
+            [user_id]
+        ];
+        User.alter(values, function(result) {
+            if (result == null) {
+                res.status(404);
+                res.json("Not Found");
+                return;
+            }
+            res.status(200);
+            res.json("OK");
+        });
+    });
 };
 
 exports.login = async function (req, res) {

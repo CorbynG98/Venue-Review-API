@@ -18,8 +18,17 @@ exports.insert = function(values, done) {
     });
 };
 
-exports.alter = function(done) {
-    return done(null);
+exports.alter = function(values, done) {
+    db.getPool().query("SELECT * FROM User WHERE user_id = ?", values[1], function(err, rows) {
+        if (err) return done(err);
+        if (rows == null || rows == []) {
+            return done(null);
+        };
+        db.getPool().query("UPDATE User SET ? WHERE user_id = ?", values, function(err, rows) {
+            if (err) return done(err);
+            return done(rows);
+        });
+    });
 };
 
 exports.getAuthUsername = function(values, done) {
@@ -36,7 +45,6 @@ exports.getAuthUsername = function(values, done) {
 };
 
 exports.getAuthEmail = function(values, done) {
-    console.log("TEST: " + values[0]);
     db.getPool().query("UPDATE User SET auth_token = ? WHERE email = ? AND password = ?;", values, function(err, rows) {
         if (err) return done(err);
         if (rows == null || rows == []) {
