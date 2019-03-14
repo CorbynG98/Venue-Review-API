@@ -25,6 +25,9 @@ exports.alter = function(done) {
 exports.getAuthUsername = function(values, done) {
     db.getPool().query("UPDATE User SET auth_token = ? WHERE username = ? AND password = ?;", values, function(err, rows) {
         if (err) return done(err);
+        if (rows == null || rows == []) {
+            return done(null);
+        }
         db.getPool().query("SELECT user_id, auth_token FROM User WHERE auth_token = ?", values[0], function(err, rows) {
             if (err) return done(err);
             return done(rows);
@@ -35,6 +38,9 @@ exports.getAuthUsername = function(values, done) {
 exports.getAuthEmail = function(values, done) {
     db.getPool().query("UPDATE User SET auth_token = ? WHERE email = ? AND password = ?;", values, function(err, rows) {
         if (err) return done(err);
+        if (rows == null || rows == []) {
+            return done(null);
+        }
         db.getPool().query("SELECT user_id, auth_token FROM User WHERE auth_token = ?", values[0], function(err, rows) {
             if (err) return done(err);
             return done(rows);

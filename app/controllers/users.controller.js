@@ -122,12 +122,22 @@ exports.login = async function (req, res) {
 
     if (isUsernameLogin) {
         User.getAuthUsername(values, function (result) {
+            if (result.length < 1) {
+                res.status(400);
+                res.json("Bad Request");
+                return;
+            }
             res.status(200);
             res.json(result[0]);
             return;
         })
     } else {
         User.getAuthEmail(values, function (result) {
+            if (result.length < 1) {
+                res.status(400);
+                res.json("Bad Request");
+                return;
+            }
             res.status(200);
             res.json(result[0]);
             return;
@@ -138,7 +148,7 @@ exports.login = async function (req, res) {
 exports.logout = async function (req, res) {
     let token = req.headers["x-authorization"];
     User.removeAuth(token, function(result) {
-        if (result == null || result == "") {
+        if (result.affectedRows == 0) {
             res.status(401);
             res.json("Unauthorized");
             return;
