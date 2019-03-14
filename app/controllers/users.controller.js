@@ -6,14 +6,14 @@ const uuidv1 = require("uuid/v1");
 exports.getById = async function (req, res) {
     let user_id = req.params.user_id;
     User.getOne(user_id, function (result) {
-        if (result === null || result == "") {
+        if (result === null || result === "") {
             res.status(404);
             res.json("Not Found");
             return;
-        };
+        }
 
         authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
-            if (authResult == null || authResult[0].user_id != user_id) {
+            if (authResult == null || authResult[0].user_id !== user_id) {
                 delete result[0].email;
             }
             res.status(200);
@@ -23,7 +23,7 @@ exports.getById = async function (req, res) {
 };
 
 function testEmail(email) {
-    let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
 }
 
@@ -37,12 +37,12 @@ exports.create = async function (req, res) {
     };
 
     for (let item in user_data) {
-        if (user_data[item] == null || user_data[item] == undefined) {
+        if (user_data[item] == null || user_data[item] === undefined) {
             res.status(400);
             res.json("Bad Request");
             return;
-        };
-    };
+        }
+    }
 
     if (!testEmail(user_data["email"])) {
         res.status(400);
@@ -68,7 +68,7 @@ exports.create = async function (req, res) {
     ];
 
     User.insert(values, function(result) {
-        if (result.code == "ER_DUP_ENTRY") {
+        if (result.code === "ER_DUP_ENTRY") {
             res.status(400);
             res.json("Bad Request");
             return;
@@ -88,15 +88,15 @@ exports.update = async function (req, res) {
         "password": req.body.password
     };
 
-    let queryPart = ""
+    let queryPart = "";
     for (let value in user_data) {
-        if (user_data[value] != undefined) {
-            if (user_data[value] == "") {
+        if (user_data[value] !== undefined) {
+            if (user_data[value] === "") {
                 res.status(400);
                 res.json("Bad Request");
                 return;
             }
-            if (value == "password") {
+            if (value === "password") {
                 if (typeof user_data["password"] != "string") {
                     res.status(400);
                     res.json("Bad Request");
@@ -107,11 +107,11 @@ exports.update = async function (req, res) {
                 queryPart += value + " = " + hash.digest("hex") + ", ";
             } else {
                 queryPart += value + " = " + user_data[value] + ", ";
-            };
-        };
-    };
+            }
+        }
+    }
 
-    if (queryPart == "") {
+    if (queryPart === "") {
         res.status(400);
         res.json("Bad Request");
         return;
@@ -124,7 +124,7 @@ exports.update = async function (req, res) {
             res.status(401);
             res.json("Unauthorized");
             return;
-        } else if (authResult[0].user_id != user_id) {
+        } else if (authResult[0].user_id !== user_id) {
             res.status("403");
             res.json("Forbidden");
             return;
@@ -153,7 +153,7 @@ exports.login = async function (req, res) {
         "password": req.body.password
     };
 
-    if (user_data["password"] == undefined) {
+    if (user_data["password"] === undefined) {
         res.status(400);
         res.json("Bad Request");
         return;
@@ -165,12 +165,12 @@ exports.login = async function (req, res) {
 
     values.push(token);
 
-    if (user_data["email"] == undefined && user_data["username"] == undefined) {
+    if (user_data["email"] === undefined && user_data["username"] === undefined) {
         res.status(400);
         res.json("Bad Request");
         return;
     } else {
-        if (user_data["username"] == undefined) {
+        if (user_data["username"] === undefined) {
             values.push([user_data["email"]]);
         } else {
             values.push([user_data["username"]]);
@@ -192,7 +192,6 @@ exports.login = async function (req, res) {
             }
             res.status(200);
             res.json(result[0]);
-            return;
         })
     } else {
         User.getAuthEmail(values, function (result) {
@@ -203,20 +202,19 @@ exports.login = async function (req, res) {
             }
             res.status(200);
             res.json(result[0]);
-            return;
         });
-    };
+    }
 };
 
 exports.logout = async function (req, res) {
     let token = req.headers["x-authorization"];
-    if (token == undefined) {
+    if (token === undefined) {
         res.status(401);
         res.json("Unauthorized");
         return;
     }
     User.removeAuth(token, function(result) {
-        if (result.affectedRows == 0) {
+        if (result.affectedRows === 0) {
             res.status(401);
             res.json("Unauthorized");
             return;
