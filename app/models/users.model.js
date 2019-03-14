@@ -28,7 +28,7 @@ exports.getAuthUsername = function(values, done) {
         if (rows == null || rows == []) {
             return done(null);
         }
-        db.getPool().query("SELECT user_id as userId, auth_token FROM User WHERE auth_token = ?", values[0], function(err, rows) {
+        db.getPool().query("SELECT user_id as userId, auth_token as token FROM User WHERE auth_token = ?", values[0], function(err, rows) {
             if (err) return done(err);
             return done(rows);
         });
@@ -42,7 +42,7 @@ exports.getAuthEmail = function(values, done) {
         if (rows == null || rows == []) {
             return done(null);
         }
-        db.getPool().query("SELECT user_id as userId, auth_token FROM User WHERE auth_token = ?", values[0], function(err, rows) {
+        db.getPool().query("SELECT user_id as userId, auth_token as token FROM User WHERE auth_token = ?", values[0], function(err, rows) {
             if (err) return done(err);
             return done(rows);
         });
