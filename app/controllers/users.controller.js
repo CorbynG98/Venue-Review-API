@@ -22,6 +22,11 @@ exports.getById = async function (req, res) {
     });
 };
 
+function testEmail(email) {
+    let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
 exports.create = async function (req, res) {
     let user_data = {
         "username": req.body.username,
@@ -39,6 +44,18 @@ exports.create = async function (req, res) {
         };
     };
 
+    if (!testEmail(user_data["email"])) {
+        res.status(400);
+        res.json("Bad Request");
+        return;
+    }
+
+    if (strip(user_data["password"].toString()) === "") {
+        res.status(400);
+        res.json("Bad Request");
+        return;
+    }
+
     const hash = crypto.createHash("sha256");
     hash.update(user_data["password"]);
 
@@ -52,8 +69,8 @@ exports.create = async function (req, res) {
 
     User.insert(values, function(result) {
         if (result.code == "ER_DUP_ENTRY") {
-            res.status(422);
-            res.json("Unprocessable Entry");
+            res.status(400);
+            res.json("Bad Request");
             return;
         }
         res.status(201);
@@ -91,10 +108,10 @@ exports.login = async function (req, res) {
         return;
     } else {
         if (user_data["email"] == undefined) {
-            values.push([user_data["username"]])
+            values.push([user_data["username"]]);
             isUsernameLogin = true;
         } else {
-            values.push([user_data["email"]])
+            values.push([user_data["email"]]);
         }
     }
 
