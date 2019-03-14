@@ -50,7 +50,7 @@ exports.create = async function (req, res) {
         return;
     }
 
-    if (strip(user_data["password"].toString()) === "") {
+    if (user_data["password"].toString().trim() === "") {
         res.status(400);
         res.json("Bad Request");
         return;
