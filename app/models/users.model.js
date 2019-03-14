@@ -2,7 +2,7 @@ const db = require('../../config/db');
 
 
 exports.getOne = function(user_id, done) {
-    db.getPool().query("SELECT username, email, given_name, family_name FROM User WHERE user_id = ?;", user_id, function(err, rows) {
+    db.getPool().query("SELECT username, email, given_name as givenName, family_name as familyName FROM User WHERE user_id = ?;", user_id, function(err, rows) {
         if (err) return done(err);
         return done(rows);
     })
