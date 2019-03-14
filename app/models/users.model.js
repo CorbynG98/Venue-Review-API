@@ -36,6 +36,7 @@ exports.getAuthUsername = function(values, done) {
 };
 
 exports.getAuthEmail = function(values, done) {
+    console.log("TEST: " + values[0]);
     db.getPool().query("UPDATE User SET auth_token = ? WHERE email = ? AND password = ?;", values, function(err, rows) {
         if (err) return done(err);
         if (rows == null || rows == []) {

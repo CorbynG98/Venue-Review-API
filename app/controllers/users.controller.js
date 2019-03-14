@@ -107,11 +107,11 @@ exports.login = async function (req, res) {
         res.json("Bad Request");
         return;
     } else {
-        if (user_data["email"] == undefined) {
+        if (user_data["username"] == undefined) {
+            values.push([user_data["email"]]);
+        } else {
             values.push([user_data["username"]]);
             isUsernameLogin = true;
-        } else {
-            values.push([user_data["email"]]);
         }
     }
 
@@ -147,6 +147,11 @@ exports.login = async function (req, res) {
 
 exports.logout = async function (req, res) {
     let token = req.headers["x-authorization"];
+    if (token == undefined) {
+        res.status(401);
+        res.json("Unauthorized");
+        return;
+    }
     User.removeAuth(token, function(result) {
         if (result.affectedRows == 0) {
             res.status(401);
