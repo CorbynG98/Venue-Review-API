@@ -230,7 +230,7 @@ exports.logout = async function (req, res) {
 
 exports.getPhoto = function (req, res) {
     let user_id = req.params.user_id;
-    if (!fs.existsSync("./storage/photos/dps/")) {
+    if (!fs.existsSync("./storage/photos/")) {
         res.status(404);
         res.json("Not Found");
         return;
@@ -241,7 +241,7 @@ exports.getPhoto = function (req, res) {
             res.json("Not Found");
             return;
         }
-        let imageFile = "./storage/photos/dps/" + result[0].profile_photo_filename;
+        let imageFile = "./storage/photos/" + result[0].profile_photo_filename;
         fs.readFile(imageFile, function(err, data) {
             if (err) {
                 res.status(404);
@@ -270,7 +270,11 @@ exports.uploadPhoto = async function (req, res) {
             res.json("Forbidden");
             return;
         }
-        let imageDIR = "./storage/photos/dps/";
+        let imageDIR = "./storage/";
+        if (!fs.existsSync(imageDIR)) {
+            fs.mkdirSync(imageDIR);
+        }
+        imageDIR += "photos/";
         if (!fs.existsSync(imageDIR)) {
             fs.mkdirSync(imageDIR);
         }
@@ -303,7 +307,7 @@ exports.uploadPhoto = async function (req, res) {
 
 exports.removePhoto = function (req, res) {
     let user_id = req.params.user_id;
-    if (!fs.existsSync("./storage/photos/dps/")) {
+    if (!fs.existsSync("./storage/photos/")) {
         res.status(404);
         res.json("Not Found");
         return;
@@ -324,16 +328,18 @@ exports.removePhoto = function (req, res) {
                 res.json("Not Found");
                 return;
             }
-            let imageFile = "./storage/photos/dps/" + result[0].profile_photo_filename;
+            let imageFile = "./storage/photos/" + result[0].profile_photo_filename;
             fs.unlink(imageFile, function(err, data) {
                 if (err) {
                     res.status(404);
                     res.json("Not Found");
                     return;
                 }
-                res.status(200);
-                res.json("OK");
-                return;
+                User.deletePhoto(user_id, function(result) {
+                    res.status(200);
+                    res.json("OK");
+                    return;
+                });
             });
         });
     });

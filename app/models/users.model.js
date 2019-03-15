@@ -84,5 +84,8 @@ exports.uploadPhoto = function(values, done) {
 };
 
 exports.deletePhoto = function(user_id, done) {
-    return done(null);
+    db.getPool().query("UPDATE User SET profile_photo_filename = NULL WHERE user_id = ?", user_id, function(err, rows) {
+        if (err) return done(err);
+        return done(rows);
+    });
 };
