@@ -332,7 +332,7 @@ exports.removePhoto = function (req, res) {
                     return;
                 }
                 res.status(200);
-                res.end(data, "binary");
+                res.json("OK");
                 return;
             });
         });
