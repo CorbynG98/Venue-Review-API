@@ -63,3 +63,26 @@ exports.removeAuth = function(token, done) {
         return done(rows);
     });
 };
+
+exports.getPhoto = function(user_id, done) {
+    db.getPool().query("SELECT profile_photo_filename FROM User WHERE user_id = ?", user_id, function (err, rows) {
+        if (err) return done(err);
+        if (rows == []) return done(null);
+        return done(rows);
+    })
+};
+
+exports.uploadPhoto = function(values, done) {
+    db.getPool().query("SELECT * FROM User WHERE user_id = ?", values[1], function(err, rows) {
+        if (err) return done(err);
+        if (rows == []) return done(null);
+        db.getPool().query("UPDATE User SET profile_photo_filename = ? WHERE user_id = ?", values, function(err, rows) {
+            if (err) return done(err);
+            return done(rows);
+        });
+    });
+};
+
+exports.deletePhoto = function(user_id, done) {
+    return done(null);
+};
