@@ -230,11 +230,6 @@ exports.logout = async function (req, res) {
 
 exports.getPhoto = function (req, res) {
     let user_id = req.params.id;
-    if (!fs.existsSync("./storage/photos/")) {
-        res.status(404);
-        res.json("Not Found");
-        return;
-    }
     User.getPhoto(user_id, function(result) {
         if (result == null || result[0] == undefined|| result[0].profile_photo_filename == null || result[0].profile_photo_filename == undefined) {
             res.status(404);
@@ -278,7 +273,7 @@ exports.uploadPhoto = async function (req, res) {
         return;
     }
 
-    authCheck.checkUserAuth(req.headers["x-authorization"], function(result) {
+    authCheck.checkUserAuth(req.headers["x-authorization"], async function(result) {
         if (result == null) {
             res.status(401);
             res.json("Unauthorized");
@@ -289,15 +284,15 @@ exports.uploadPhoto = async function (req, res) {
             return;
         }
         let imageDIR = "./storage/";
-        if (!fs.existsSync(imageDIR)) {
-            fs.mkdirSync(imageDIR);
+        if (!await fs.existsSync(imageDIR)) {
+            await fs.mkdirSync(imageDIR);
         }
         imageDIR += "photos/";
-        if (!fs.existsSync(imageDIR)) {
-            fs.mkdirSync(imageDIR);
+        if (!await fs.existsSync(imageDIR)) {
+            await fs.mkdirSync(imageDIR);
         }
         let fileName = imageDIR + user_id + "dp.txt";
-        if (fs.existsSync(fileName)) {
+        if (await fs.existsSync(fileName)) {
             res.status(200);
             res.json("OK");
         } else {
