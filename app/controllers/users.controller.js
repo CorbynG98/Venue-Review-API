@@ -267,12 +267,6 @@ exports.uploadPhoto = async function (req, res) {
     let user_id = req.params.id;
     let image = req.body;
 
-    if (isEmpty(req.body)) {
-        res.status(400);
-        res.json("Bad Request");
-        return;
-    }
-
     authCheck.checkUserAuth(req.headers["x-authorization"], async function(result) {
         if (result == null) {
             res.status(401);
