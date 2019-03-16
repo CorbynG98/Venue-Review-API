@@ -13,9 +13,9 @@ exports.getById = async function (req, res) {
             res.json("Not Found");
             return;
         };
-
+        delete result[0].photo;
         authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
-            if (authResult == null || authResult[0].user_id != user_id) {
+            if (authResult == null || authResult[0] == undefined|| authResult[0].user_id != user_id) {
                 delete result[0].email;
             }
             res.status(200);
@@ -254,6 +254,13 @@ exports.uploadPhoto = function (req, res) {
             res.json("Not Found");
             return;
         }
+        if (result[0].photo != null || result[0].photo != undefined) {
+            res.status(200);
+            res.json("OK");
+        } else {
+            res.status(201);
+            res.json("Created");
+        }
         authCheck.checkUserAuth(req.headers["x-authorization"], function(result) {
             if (result == null) {
                 res.status(401);
@@ -273,13 +280,6 @@ exports.uploadPhoto = function (req, res) {
                 fs.mkdirSync(imageDIR);
             }
             let fileName = imageDIR + user_id + "dp." + imageExt;
-            if (fs.existsSync(fileName)) {
-                res.status(200);
-                res.json("OK");
-            } else {
-                res.status(201);
-                res.json("Created");
-            }
 
             fs.writeFile(fileName, image, "utf8", function (err) {
                 if (err) {
