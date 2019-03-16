@@ -249,9 +249,9 @@ exports.uploadPhoto = async function (req, res) {
     Promise.promisifyAll(fs);
     let user_id = req.params.id;
     let image = req.body;
-    let imageExt = fileType(image).ext;
+    let imageExt = "png" //fileType(image).ext;
 
-    authCheck.checkUserAuth(req.headers["x-authorization"], async function(result) {
+    authCheck.checkUserAuth(req.headers["x-authorization"], function(result) {
         if (result == null) {
             res.status(401);
             res.json("Unauthorized");
@@ -262,15 +262,15 @@ exports.uploadPhoto = async function (req, res) {
             return;
         }
         let imageDIR = "./storage/";
-        if (!await fs.existsSync(imageDIR)) {
-            await fs.mkdirSync(imageDIR);
+        if (!fs.existsSync(imageDIR)) {
+            fs.mkdirSync(imageDIR);
         }
         imageDIR += "photos/";
-        if (!await fs.existsSync(imageDIR)) {
-            await fs.mkdirSync(imageDIR);
+        if (!fs.existsSync(imageDIR)) {
+            fs.mkdirSync(imageDIR);
         }
         let fileName = imageDIR + user_id + "dp." + imageExt;
-        if (await fs.existsSync(fileName)) {
+        if (fs.existsSync(fileName)) {
             res.status(200);
             res.json("OK");
         } else {
