@@ -251,53 +251,46 @@ exports.uploadPhoto = async function (req, res) {
     let image = req.body;
     let imageExt = fileType(image).ext;
 
-    User.getOne(user_id, function(result) {
+    authCheck.checkUserAuth(req.headers["x-authorization"], async function(result) {
         if (result == null) {
-            res.status(404);
-            res.json("Not Found");
+            res.status(401);
+            res.json("Unauthorized");
+            return;
+        } else if (result[0].user_id != user_id) {
+            res.status(403);
+            res.json("Forbidden");
             return;
         }
-        authCheck.checkUserAuth(req.headers["x-authorization"], async function(result) {
-            if (result == null) {
-                res.status(401);
-                res.json("Unauthorized");
-                return;
-            } else if (result[0].user_id != user_id) {
-                res.status(403);
-                res.json("Forbidden");
-                return;
-            }
-            let imageDIR = "./storage/";
-            if (!await fs.existsSync(imageDIR)) {
-                await fs.mkdirSync(imageDIR);
-            }
-            imageDIR += "photos/";
-            if (!await fs.existsSync(imageDIR)) {
-                await fs.mkdirSync(imageDIR);
-            }
-            let fileName = imageDIR + user_id + "dp." + imageExt;
-            if (await fs.existsSync(fileName)) {
-                res.status(200);
-                res.json("OK");
-            } else {
-                res.status(201);
-                res.json("Created");
-            }
+        let imageDIR = "./storage/";
+        if (!await fs.existsSync(imageDIR)) {
+            await fs.mkdirSync(imageDIR);
+        }
+        imageDIR += "photos/";
+        if (!await fs.existsSync(imageDIR)) {
+            await fs.mkdirSync(imageDIR);
+        }
+        let fileName = imageDIR + user_id + "dp." + imageExt;
+        if (await fs.existsSync(fileName)) {
+            res.status(200);
+            res.json("OK");
+        } else {
+            res.status(201);
+            res.json("Created");
+        }
 
-            fs.writeFile(fileName, image, "utf8", function (err) {
-                if (err) {
-                    console.log(err);
+        fs.writeFile(fileName, image, "utf8", function (err) {
+            if (err) {
+                console.log(err);
+            }
+            let values = [
+                [user_id + "dp." + imageExt],
+                [user_id]
+            ];
+            User.uploadPhoto(values, function (result) {
+                if (result == null) {
+                    res.status(404);
+                    res.json("Not Found");
                 }
-                let values = [
-                    [user_id + "dp." + imageExt],
-                    [user_id]
-                ];
-                User.uploadPhoto(values, function (result) {
-                    if (result == null) {
-                        res.status(404);
-                        res.json("Not Found");
-                    }
-                });
             });
         });
     });
@@ -305,40 +298,33 @@ exports.uploadPhoto = async function (req, res) {
 
 exports.removePhoto = function (req, res) {
     let user_id = req.params.id;
-    User.getOne(user_id, function(result) {
-        if (result == null) {
-            res.status(404);
-            res.json("Not Found");
+    authCheck.checkUserAuth(req.headers["x-authorization"], function (authResult) {
+        if (authResult == null) {
+            res.status(401);
+            res.json("Unauthorized");
+            return;
+        } else if (authResult[0].user_id != user_id) {
+            res.status(403);
+            res.json("Forbidden");
             return;
         }
-        authCheck.checkUserAuth(req.headers["x-authorization"], function (authResult) {
-            if (authResult == null) {
-                res.status(401);
-                res.json("Unauthorized");
-                return;
-            } else if (authResult[0].user_id != user_id) {
-                res.status(403);
-                res.json("Forbidden");
+        User.getPhoto(user_id, function (result) {
+            if (result == null || result[0].profile_photo_filename == null || result[0].profile_photo_filename == undefined) {
+                res.status(404);
+                res.json("Not Found");
                 return;
             }
-            User.getPhoto(user_id, function (result) {
-                if (result == null || result[0].profile_photo_filename == null || result[0].profile_photo_filename == undefined) {
+            let imageFile = "./storage/photos/" + result[0].profile_photo_filename;
+            fs.unlink(imageFile, function (err, data) {
+                if (err) {
                     res.status(404);
                     res.json("Not Found");
                     return;
                 }
-                let imageFile = "./storage/photos/" + result[0].profile_photo_filename;
-                fs.unlink(imageFile, function (err, data) {
-                    if (err) {
-                        res.status(404);
-                        res.json("Not Found");
-                        return;
-                    }
-                    User.deletePhoto(user_id, function (result) {
-                        res.status(200);
-                        res.json("OK");
-                        return;
-                    });
+                User.deletePhoto(user_id, function (result) {
+                    res.status(200);
+                    res.json("OK");
+                    return;
                 });
             });
         });
