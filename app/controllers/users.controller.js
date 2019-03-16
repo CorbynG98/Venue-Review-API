@@ -6,7 +6,7 @@ const Promise = require("bluebird");
 const uuidv1 = require("uuid/v1");
 
 exports.getById = async function (req, res) {
-    let user_id = req.params.user_id;
+    let user_id = req.params.id;
     User.getOne(user_id, function (result) {
         if (result === null || result == "") {
             res.status(404);
@@ -81,7 +81,7 @@ exports.create = async function (req, res) {
 };
 
 exports.update = async function (req, res) {
-    let user_id = req.params.user_id;
+    let user_id = req.params.id;
     let user_data = {
         "username": req.body.username,
         "email": req.body.email,
@@ -229,14 +229,14 @@ exports.logout = async function (req, res) {
 };
 
 exports.getPhoto = function (req, res) {
-    let user_id = req.params.user_id;
+    let user_id = req.params.id;
     if (!fs.existsSync("./storage/photos/")) {
         res.status(404);
         res.json("Not Found");
         return;
     }
     User.getPhoto(user_id, function(result) {
-        if (result == null || result[0].profile_photo_filename == null || result[0].profile_photo_filename == undefined) {
+        if (result == null || result[0] == undefined|| result[0].profile_photo_filename == null || result[0].profile_photo_filename == undefined) {
             res.status(404);
             res.json("Not Found");
             return;
@@ -255,10 +255,28 @@ exports.getPhoto = function (req, res) {
     });
 };
 
+function isEmpty(obj) {
+    // null and undefined are "empty"
+    if (obj == null) return true;
+
+    // Assume if it has a length property with a non-zero value
+    // that that property is correct.
+    if (obj.length && obj.length > 0)    return false;
+    if (obj.length === 0)  return true;
+
+    return true;
+}
+
 exports.uploadPhoto = async function (req, res) {
     Promise.promisifyAll(fs);
-    let user_id = req.params.user_id;
+    let user_id = req.params.id;
     let image = req.body;
+
+    if (isEmpty(req.body)) {
+        res.status(400);
+        res.json("Bad Request");
+        return;
+    }
 
     authCheck.checkUserAuth(req.headers["x-authorization"], function(result) {
         if (result == null) {
@@ -306,12 +324,7 @@ exports.uploadPhoto = async function (req, res) {
 };
 
 exports.removePhoto = function (req, res) {
-    let user_id = req.params.user_id;
-    if (!fs.existsSync("./storage/photos/")) {
-        res.status(404);
-        res.json("Not Found");
-        return;
-    }
+    let user_id = req.params.id;
     authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
         if (authResult == null) {
             res.status(401);

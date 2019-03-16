@@ -1,7 +1,7 @@
 const user = require('../controllers/users.controller');
 
 module.exports = function (app) {
-    app.route(app.rootUrl + '/users/:user_id')
+    app.route(app.rootUrl + '/users/:id')
         .get(user.getById)
         .patch(user.update);
 
@@ -14,7 +14,7 @@ module.exports = function (app) {
     app.route(app.rootUrl + "/users/logout")
         .post(user.logout);
 
-    app.route(app.rootUrl + "/users/:user_id/photos")
+    app.route(app.rootUrl + "/users/:id/photos")
         .get(user.getPhoto)
         .put(user.uploadPhoto)
         .delete(user.removePhoto);
