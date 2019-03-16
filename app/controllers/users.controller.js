@@ -256,10 +256,8 @@ exports.uploadPhoto = function (req, res) {
         }
         if (result[0].photo != null || result[0].photo != undefined) {
             res.status(200);
-            res.json("OK");
         } else {
             res.status(201);
-            res.json("Created");
         }
         authCheck.checkUserAuth(req.headers["x-authorization"], function(result) {
             if (result == null) {
@@ -290,10 +288,11 @@ exports.uploadPhoto = function (req, res) {
                     [user_id]
                 ];
                 User.uploadPhoto(values, function (result) {
-                    if (result == null) {
-                        res.status(404);
-                        res.json("Not Found");
+                    if (res.statusCode == 201) {
+                        res.json('Created');
+                        return;
                     }
+                    res.json("OK");
                 });
             });
         });
