@@ -2,7 +2,7 @@ const User = require("../models/users.model");
 const authCheck = require("../Util/authCheck");
 const crypto = require("crypto");
 const fs = require("fs");
-var path = require('path');
+const path = require('path');
 const uuidv1 = require("uuid/v1");
 
 exports.getById = async function (req, res) {
@@ -90,7 +90,7 @@ exports.update = async function (req, res) {
         "password": req.body.password
     };
 
-    let queryPart = ""
+    let queryPart = "";
     for (let value in user_data) {
         if (user_data[value] != undefined) {
             if (user_data[value] == "") {
