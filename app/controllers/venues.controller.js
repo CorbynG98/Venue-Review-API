@@ -82,7 +82,7 @@ exports.getById = function(req, res) {
                 //if (user_data["reverseOrder"]) orderClaus += "DESC";
             }
             if (key == "count") {
-                fetchClaus += "FETCH FIRST " + user_data[key] + " ROWS ONLY";
+                fetchClaus += "LIMIT " + user_data[key];
             }
             else {
                 if (key == "adminId") whereClaus += "admin_id = " + user_data["adminId"] + ", ";
@@ -99,23 +99,21 @@ exports.getById = function(req, res) {
         whereClaus = whereClaus.substring(0, whereClaus.length - 2);
     }
 
-    let queryString = whereClaus + orderClaus + fetchClaus;
-
     let values = [
-        [queryString]
+        [whereClaus],
+        [orderClaus],
+        [fetchClaus]
     ];
 
-    console.log(queryString);
+    console.log(fetchClaus);
+    console.log(orderClaus);
+    console.log(whereClaus);
 
     Venues.get(values, function(result) {
         res.status(200);
         res.json(result);
         return;
     });
-
-    //console.log(fetchClaus);
-    //console.log(orderClaus);
-    // console.log(whereClaus);
 
     //res.status(200);
     //res.json("This is a temporary placeholder");
