@@ -11,7 +11,6 @@ exports.get = function(values, done) {
         ` ${values[4]}` +
         ` ${values[2]}` +
         ` ${values[3]}`;
-    console.log(query);
     db.getPool().query(query, function(err, rows) {
         if (err) return done(err);
         return done(rows);

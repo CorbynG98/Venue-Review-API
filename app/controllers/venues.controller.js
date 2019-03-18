@@ -99,7 +99,7 @@ exports.getById = function(req, res) {
                 if (!user_data["reverseOrder"]) orderClaus += " DESC";
             }
             if (key == "count") {
-                fetchClaus += "LIMIT " + user_data[key];
+                // fetchClaus += "LIMIT " + user_data[key];
             }
             else {
                 if (key == "adminId") whereClaus += "admin_id = " + user_data["adminId"] + "AND ";
@@ -127,13 +127,19 @@ exports.getById = function(req, res) {
     ];
 
     Venues.get(values, function(result) {
-        if (user_data["startIndex"] > result.length -1 || result.length == 0) {
+        if (parseInt(user_data["startIndex"]) > result.length - 1 || result.length == 0) {
             res.status(200);
             res.json([]);
             return;
         }
+        let endIndex = result.length;
+        if (user_data["count"] != undefined) {
+            if (parseInt(user_data["count"]) < endIndex) {
+                endIndex = parseInt(user_data["count"]);
+            }
+        }
         res.status(200);
-        res.json(result.splice(user_data["startIndex"], result.length));
+        res.json(result.splice(user_data["startIndex"], endIndex));
         return;
     });
 };
