@@ -46,6 +46,8 @@ exports.getById = function(req, res) {
     let whereClaus = "WHERE ";
     let orderClaus = "";
     let fetchClaus = "";
+    let havingClaus = "HAVING ";
+    let modeCostRating = "(SELECT mode_cost_rating FROM ModeCostRating JOIN Venue ON ModeCostRating.venue_id = Venue.venue_id ORDER BY occurrences DESC LIMIT 1)";
 
 
     // Create parts of the query with the data here
@@ -53,7 +55,6 @@ exports.getById = function(req, res) {
         if (user_data[key] != undefined) {
             if (["startIndex", "count", "categoryId", "minStarRating", "maxCostRating", "adminId", "myLatitude", "myLongitude"].includes(key)) {
                 if (isNaN(user_data[key])) {
-                    console.log(key);
                     res.status(400);
                     res.json("Bad Request");
                     return;
@@ -103,8 +104,10 @@ exports.getById = function(req, res) {
             else {
                 if (key == "adminId") whereClaus += "admin_id = " + user_data["adminId"] + "AND ";
                 else if (key == "categoryId") whereClaus += "category_id = " + user_data["categoryId"] + " AND ";
-                else if (key == "city") whereClaus += "city = " + user_data["city"] + " AND ";
-                else if (key == "q") whereClaus += "CONTAINS(venue_name, " + user_data["q"] + ") AND ";
+                else if (key == "city") whereClaus += 'city = "' + user_data["city"] + '" AND ';
+                else if (key == "q") whereClaus += "lower(venue_name) like '%" + user_data["q"] + "%' AND ";
+                else if (key == "maxCostRating") havingClaus += "modeCostRating <= " + user_data["maxCostRating"] + " AND ";
+                else if (key == "minStarRating") havingClaus += "AVG(star_rating) >= " + user_data["minStarRating"] + " AND ";
             }
         }
     }
@@ -112,16 +115,25 @@ exports.getById = function(req, res) {
     if (whereClaus == "WHERE ") whereClaus = "";
     else whereClaus = whereClaus.substring(0, whereClaus.length - 4);
 
+    if (havingClaus == "HAVING ") havingClaus = "";
+    else havingClaus = havingClaus.substring(0, havingClaus.length - 4);
+
     let values = [
         [getDistance],
         [whereClaus],
         [orderClaus],
-        [fetchClaus]
+        [fetchClaus],
+        [havingClaus]
     ];
 
     Venues.get(values, function(result) {
+        if (user_data["startIndex"] > result.length -1 || result.length == 0) {
+            res.status(200);
+            res.json([]);
+            return;
+        }
         res.status(200);
-        res.json(result);
+        res.json(result.splice(user_data["startIndex"], result.length));
         return;
     });
 };
