@@ -18,6 +18,7 @@ exports.getById = function(req, res) {
     };
 
     let isDistance = false;
+    let getDistance = "";
 
     // set defaults if they weren't defined
     if (user_data["sortBy"] == undefined) user_data["sortBy"] = "STAR_RATING";
@@ -35,6 +36,10 @@ exports.getById = function(req, res) {
     }
 
     if (user_data["myLatitude"] != undefined && user_data["myLongitude"] != undefined) {
+        getDistance = ", (6371 * acos (cos(radians(-45))" +
+            " * cos (radians(latitude))" +
+            " * cos (radians(longitude) - radians(170)) + sin(radians(-45))" +
+            " * sin (radians(latitude)) ) ) AS distance";
         isDistance = true;
     }
 
@@ -60,6 +65,13 @@ exports.getById = function(req, res) {
                         return;
                     }
                 }
+                if (key == "maxCostRating") {
+                    if (!["4", "3", "2", "1", "0"].includes(user_data[key])) {
+                        res.status(400);
+                        res.json("Bad Request");
+                        return;
+                    }
+                }
                 if (user_data["sortBy"] == "DISTANCE") {
                     if (!isDistance) {
                         res.status(400);
@@ -78,45 +90,40 @@ exports.getById = function(req, res) {
 
             // Add the part to the query
             if (key == "sortBy") {
-                //orderClaus += "ORDER BY ( SELECT AVG(star_rating) FROM Review JOIN Venue ON Review.reviewed_venue_id = Venue.venue_id )";
-                //if (user_data["reverseOrder"]) orderClaus += "DESC";
+                if (user_data[key] == "STAR_RATING")  orderClaus = "ORDER BY AVG(star_rating)";
+                else if (user_data[key] == "COST_RATING") orderClaus = "ORDER BY AVG(cost_rating)";
+                else if (user_data[key] == "DISTANCE") {
+                    orderClaus = "ORDER BY DISTANCE";
+                }
+                if (!user_data["reverseOrder"]) orderClaus += " DESC";
             }
             if (key == "count") {
                 fetchClaus += "LIMIT " + user_data[key];
             }
             else {
-                if (key == "adminId") whereClaus += "admin_id = " + user_data["adminId"] + ", ";
-                if (key == "categoryId") whereClaus += "category_id = " + user_data["categoryId"] + ", ";
-                if (key == "city") whereClaus += "city = " + user_data["city"] + ", ";
-                if (key == "q") whereClaus += "CONTAINS(venue_name, " + user_data["q"] + "), "
+                if (key == "adminId") whereClaus += "admin_id = " + user_data["adminId"] + "AND ";
+                else if (key == "categoryId") whereClaus += "category_id = " + user_data["categoryId"] + " AND ";
+                else if (key == "city") whereClaus += "city = " + user_data["city"] + " AND ";
+                else if (key == "q") whereClaus += "CONTAINS(venue_name, " + user_data["q"] + ") AND ";
             }
         }
     }
 
-    if (whereClaus == "WHERE ") {
-        whereClaus = "";
-    } else {
-        whereClaus = whereClaus.substring(0, whereClaus.length - 2);
-    }
+    if (whereClaus == "WHERE ") whereClaus = "";
+    else whereClaus = whereClaus.substring(0, whereClaus.length - 4);
 
     let values = [
+        [getDistance],
         [whereClaus],
         [orderClaus],
         [fetchClaus]
     ];
-
-    console.log(fetchClaus);
-    console.log(orderClaus);
-    console.log(whereClaus);
 
     Venues.get(values, function(result) {
         res.status(200);
         res.json(result);
         return;
     });
-
-    //res.status(200);
-    //res.json("This is a temporary placeholder");
 };
 
 exports.create = function(req, res) {

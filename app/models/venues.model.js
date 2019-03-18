@@ -1,11 +1,17 @@
 const db = require('../../config/db');
 
 exports.get = function(values, done) {
-    db.getPool().query("SELECT venue_id as venueId, category_id as categoryId,  venue_name as venueName, city, short_description as shortDescription, latitude, longitude, AVG(star_rating) as meanStartRating, AVG(cost_rating) as meanCostRating" +
-        " FROM Venue" +
-        " LEFT JOIN Review ON Venue.venue_id = Review.reviewed_venue_id" +
-        " ?" +
-        " GROUP BY venue_id", values, function(err, rows) {
+    let modeCostRating = "(SELECT mode_cost_rating FROM ModeCostRating JOIN Venue ON ModeCostRating.venue_id = Venue.venue_id ORDER BY occurrences DESC LIMIT 1)";
+    let primaryPhoto = "(SELECT photo_filename FROM Venue JOIN VenuePhoto ON Venue.venue_id = VenuePhoto.venue_id WHERE is_primary = 1)";
+    let query = `SELECT venue_id as venueId, venue_name as venueName, category_id as categoryId, city, short_description as shortDescription, latitude, longitude, AVG(star_rating) as meanStartRating, ${modeCostRating} as modeCostRating, ${primaryPhoto} as primaryPhoto ${values[0]} ` +
+        ` FROM Venue` +
+        ` LEFT JOIN Review ON Venue.venue_id = Review.reviewed_venue_id` +
+        ` ${values[1]}` +
+        ` GROUP BY venue_id` +
+        ` ${values[2]}` +
+        ` ${values[3]}`;
+    console.log(query);
+    db.getPool().query(query, function(err, rows) {
         if (err) return done(err);
         return done(rows);
     });
