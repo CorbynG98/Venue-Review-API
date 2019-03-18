@@ -148,3 +148,82 @@ exports.create = function(req, res) {
     res.status(201);
     res.json("Created");
 };
+
+exports.getOne = function(req, res) {
+    let venue_id = req.params.id;
+
+    let values = [
+        [venue_id]
+    ];
+
+    Venues.getById(values, function(result) {
+        if (result == null) {
+            res.status(404);
+            res.json("Not Found");
+            return;
+        }
+        res.status(200);
+        res.json(result);
+    });
+};
+
+exports.update = function(req, res) {
+    let venue_id = req.params.id;
+
+    let user_data = {
+        "venue_name": req.body.venueName,
+        "category_id": req.body.categoryId,
+        "city": req.body.city,
+        "short_description": req.body.shortDescription,
+        "long_description": req.body.longDescription,
+        "address": req.body.address,
+        "latitude": req.body.latitude,
+        "longitude": req.body.longitude
+    };
+
+    let queryPart = "";
+
+    authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+        if (authResult == null) {
+            res.status(401);
+            res.json("Unauthorized");
+            return;
+        } else if (authResult[0].venue_id != venue_id) {
+            res.status("403");
+            res.json("Forbidden");
+            return;
+        }
+        for (let key in user_data) {
+            if (user_data[key] != undefined) {
+                if (user_data[key] == "") {
+                    res.status(400);
+                    res.json("Bad Request");
+                    return;
+                }
+                if (["venue_name", "city", "short_description", "long_description", "address"].includes(key)) queryPart += key + ` = "` + user_data[key] + `", `;
+                else queryPart += key + " = " + user_data[key] + ", ";
+            }
+        }
+        if (queryPart == "") {
+            res.status(400);
+            res.json("Bad Request");
+            return;
+        }
+        queryPart = queryPart.substring(0, queryPart.length - 2);
+        let values = [
+            [queryPart],
+            [venue_id]
+        ];
+
+        Venues.alter(values, function(result) {
+            if (result == null) {
+                res.status(404);
+                res.json("Not Found");
+                return;
+            }
+            res.status(200);
+            res.json("OK");
+            return;
+        });
+    });
+};
