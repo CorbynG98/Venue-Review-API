@@ -188,7 +188,7 @@ exports.update = function(req, res) {
             res.status(401);
             res.json("Unauthorized");
             return;
-        } else if (authResult[0].venue_id != venue_id) {
+        } else if (authResult == "" || authResult[0].venue_id != venue_id) {
             res.status("403");
             res.json("Forbidden");
             return;

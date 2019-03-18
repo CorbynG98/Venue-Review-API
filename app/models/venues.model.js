@@ -22,18 +22,18 @@ exports.insert = function(done) {
 };
 
 exports.getById = function(values, done) {
-    db.getPool().query("SELECT Venue.venue_name as venueName, Venue.admin_id as adminId, Venue.category_id as categoryId, city, short_description as shortDescription, " +
+    db.getPool().query("SELECT Venue.venue_name as venueName, Venue.admin_id as admin, Venue.category_id as category, city, short_description as shortDescription, " +
         "long_description as longDescription, date_added as dateAdded, address, latitude, longitude, null as photos FROM Venue WHERE venue_id = ?", values, function(err, mainResult) {
         if (err) return done(err);
         if (mainResult == "" || mainResult == []) return done(null);
-        db.getPool().query("SELECT user_id as userId, username FROM User WHERE user_id = ?", [[mainResult[0].adminId]], function(err, userResult) {
+        db.getPool().query("SELECT user_id as userId, username FROM User WHERE user_id = ?", [[mainResult[0].admin]], function(err, userResult) {
             if (err) return done(err);
-            db.getPool().query("SELECT category_id as categoryId, category_name as categoryName, category_description as categoryDescription FROM VenueCategory WHERE category_id = ?", [[mainResult[0].categoryId]], function(err, categoryResult) {
+            db.getPool().query("SELECT category_id as categoryId, category_name as categoryName, category_description as categoryDescription FROM VenueCategory WHERE category_id = ?", [[mainResult[0].category]], function(err, categoryResult) {
                 if (err) return done(err);
                 db.getPool().query("SELECT photo_filename as photoFilename, photo_description as photoDescription, is_primary as isPrimary FROM VenuePhoto WHERE VenuePhoto.venue_id = ?", values, function(err, photoResult) {
                     if (err) return done(err);
-                    mainResult[0].adminId = userResult[0];
-                    mainResult[0].categoryId = categoryResult[0];
+                    mainResult[0].admin = userResult[0];
+                    mainResult[0].category = categoryResult[0];
                     mainResult[0].photos = photoResult;
                     return done(mainResult[0]);
                 });
