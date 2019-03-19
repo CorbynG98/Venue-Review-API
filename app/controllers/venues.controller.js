@@ -206,18 +206,20 @@ exports.create = function(req, res) {
             return;
         }
 
-        let values = [
-            [user_data["venue_name"].toString()],
-            [user_data["category_id"]],
-            [user_data["city"].toString()],
-            [user_data["short_description"].toString()],
-            [user_data["long_description"].toString()],
-            [user_data["address"].toString()],
-            [user_data["latitude"]],
-            [user_data["longitude"]],
-            [authResult[0].user_id],
-            [new Date()]
-        ];
+        let date = new Date();
+
+        let values = [[
+            user_data["venue_name"].toString(),
+            user_data["category_id"],
+            user_data["city"].toString(),
+            user_data["short_description"].toString(),
+            user_data["long_description"].toString(),
+            user_data["address"].toString(),
+            user_data["latitude"],
+            user_data["longitude"],
+            authResult[0].user_id,
+            date
+        ]];
 
         Venues.insert(values, function(result) {
             res.status(201);

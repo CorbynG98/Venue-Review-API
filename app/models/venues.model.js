@@ -18,11 +18,13 @@ exports.get = function(values, done) {
 };
 
 exports.insert = function(values, done) {
-    db.getPool().query("SELECT * FROM VenueCategory WHERE category_id = ?", values[1], function(err, rows) {
+    db.getPool().query("SELECT * FROM VenueCategory WHERE category_id = ?", values[0][1], function(err, rows) {
         if (err) return done(err);
-        db.getPool().query(`INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES ('${values[0]}', ${values[1]}, '${values[2]}', '${values[3]}', '${values[4]}', '${values[5]}', ${values[6]}, ${values[7]}, ${values[8]}, '${values[9]}')`, values, function (err, rows) {
+        db.getPool().query(`INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES (?)`, values, function (err, rows) {
             if (err) return done(err);
-            db.getPool().query(`SELECT venue_id as venueId FROM Venue WHERE venue_name = '${values[0]}' AND address = '${values[5]}' AND latitude = ${values[6]} AND longitude = ${values[7]}`, function (err, result) {
+            //let values = []
+
+            db.getPool().query(`SELECT venue_id as venueId FROM Venue WHERE venue_name = ? AND address = ? AND latitude = ? AND longitude = ?`, [values[0][0], values[0][5], values[0][6], values[0][7]], function (err, result) {
                 if (err) return done(err);
                 return done(result);
             });
