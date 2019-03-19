@@ -162,8 +162,8 @@ exports.create = function(req, res) {
             res.json("Unauthorized");
             return;
         } else if (authResult == "" || authResult == []) {
-            res.status("403");
-            res.json("Forbidden");
+            res.status("401");
+            res.json("Unauthorized");
             return;
         }
 
@@ -215,7 +215,8 @@ exports.create = function(req, res) {
             [user_data["address"].toString()],
             [user_data["latitude"]],
             [user_data["longitude"]],
-            [authResult[0].user_id]
+            [authResult[0].user_id],
+            [new Date()]
         ];
 
         Venues.insert(values, function(result) {
