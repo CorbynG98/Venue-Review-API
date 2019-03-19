@@ -20,6 +20,7 @@ exports.get = function(values, done) {
 exports.insert = function(values, done) {
     db.getPool().query("SELECT * FROM VenueCategory WHERE category_id = ?", values[0][1], function(err, rows) {
         if (err) return done(err);
+        if (rows == "" || rows == []) return done(null);
         db.getPool().query(`INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id, date_added) VALUES (?)`, values, function (err, rows) {
             if (err) return done(err);
             //let values = []

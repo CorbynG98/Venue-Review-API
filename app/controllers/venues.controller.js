@@ -173,7 +173,6 @@ exports.create = function(req, res) {
                 res.json("Bad Request");
                 return;
             }
-            user_data[key] = user_data[key].toString().replace("'", "''");
         }
         if (user_data["latitude"] < -90 || user_data["latitude"] > 90) {
             res.status(400);
@@ -222,6 +221,11 @@ exports.create = function(req, res) {
         ]];
 
         Venues.insert(values, function(result) {
+            if (result == null) {
+                res.status(400);
+                res.json("Bad Request");
+                return;
+            }
             res.status(201);
             res.json(result[result.length - 1]);
             return;
