@@ -17,8 +17,14 @@ exports.get = function(values, done) {
     });
 };
 
-exports.insert = function(done) {
-    return done(null);
+exports.insert = function(values, done) {
+    db.getPool().query(`INSERT INTO Venue (venue_name, category_id, city, short_description, long_description, address, latitude, longitude, admin_id) VALUES ('${values[0]}', ${values[1]}, '${values[2]}', '${values[3]}', '${values[4]}', '${values[5]}', ${values[6]}, ${values[7]}, ${values[8]})`, values, function(err, rows) {
+        if (err) return done(err);
+        db.getPool().query(`SELECT venue_id as venueId FROM Venue WHERE venue_name = '${values[0]}' AND address = '${values[5]}' AND latitude = ${values[6]} AND longitude = ${values[7]}`, function(err, result) {
+            if (err) return done(err);
+            return done(result);
+        });
+    });
 };
 
 exports.getById = function(values, done) {

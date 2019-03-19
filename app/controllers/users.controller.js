@@ -264,7 +264,7 @@ exports.uploadPhoto = function (req, res) {
                 res.status(401);
                 res.json("Unauthorized");
                 return;
-            } else if (result[0].user_id != user_id) {
+            } else if (result == "" || result == [] || result[0].user_id != user_id) {
                 res.status(403);
                 res.json("Forbidden");
                 return;
@@ -312,7 +312,7 @@ exports.removePhoto = function (req, res) {
                 res.status(401);
                 res.json("Unauthorized");
                 return;
-            } else if (authResult[0].user_id != user_id) {
+            } else if (result == "" || result == [] || authResult[0].user_id != user_id) {
                 res.status(403);
                 res.json("Forbidden");
                 return;

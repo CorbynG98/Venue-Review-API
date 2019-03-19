@@ -145,8 +145,85 @@ exports.getById = function(req, res) {
 };
 
 exports.create = function(req, res) {
-    res.status(201);
-    res.json("Created");
+    let user_data = {
+        "venue_name": req.body.venueName,
+        "category_id": req.body.categoryId,
+        "city": req.body.city,
+        "short_description": req.body.shortDescription,
+        "long_description": req.body.longDescription,
+        "address": req.body.address,
+        "latitude": req.body.latitude,
+        "longitude": req.body.longitude,
+    };
+
+    authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
+        if (authResult == null) {
+            res.status(401);
+            res.json("Unauthorized");
+            return;
+        } else if (authResult == "" || authResult == []) {
+            res.status("403");
+            res.json("Forbidden");
+            return;
+        }
+
+        for (let key in user_data) {
+            if (key != "admin_id" && user_data[key] == undefined) {
+                res.status(400);
+                res.json("Bad Request");
+                return;
+            }
+            user_data[key] = user_data[key].toString().replace("'", "''");
+        }
+        if (user_data["latitude"] < -90 || user_data["latitude"] > 90) {
+            res.status(400);
+            res.json("Bad Request");
+            return;
+        }
+        if (user_data["longitude"] < -180 || user_data["longitude"] > 180) {
+            res.status(400);
+            res.json("Bad Request");
+            return;
+        }
+        if (user_data["city"].toString().trim() == "") {
+            res.status(400);
+            res.json("Bad Request");
+            return;
+        }
+        if (user_data["address"].toString().trim() == "") {
+            res.status(400);
+            res.json("Bad Request");
+            return;
+        }
+        if (user_data["short_description"].toString().trim() == "") {
+            res.status(400);
+            res.json("Bad Request");
+            return;
+        }
+        if (user_data["venue_name"].toString().trim() == "") {
+            res.status(400);
+            res.json("Bad Request");
+            return;
+        }
+
+        let values = [
+            [user_data["venue_name"].toString()],
+            [user_data["category_id"]],
+            [user_data["city"].toString()],
+            [user_data["short_description"].toString()],
+            [user_data["long_description"].toString()],
+            [user_data["address"].toString()],
+            [user_data["latitude"]],
+            [user_data["longitude"]],
+            [authResult[0].user_id]
+        ];
+
+        Venues.insert(values, function(result) {
+            res.status(201);
+            res.json(result[result.length - 1]);
+            return;
+        });
+    });
 };
 
 exports.getOne = function(req, res) {
