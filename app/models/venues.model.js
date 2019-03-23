@@ -67,3 +67,10 @@ exports.alter = function(values, done) {
         });
     });
 };
+
+exports.getCategories = function(done) {
+    db.getPool().query("SELECT category_id as categoryId, category_name as categoryName, category_description as categoryDescription FROM VenueCategory", function(err, rows) {
+        if (err) return done(err);
+        return done(rows);
+    });
+};

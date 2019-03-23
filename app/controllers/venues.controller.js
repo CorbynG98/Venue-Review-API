@@ -311,3 +311,10 @@ exports.update = function(req, res) {
         });
     });
 };
+
+exports.getCategories = function(req, res) {
+    Venues.getCategories(function(result) {
+        res.status(200);
+        res.json(result);
+    });
+}
