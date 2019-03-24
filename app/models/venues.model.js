@@ -74,3 +74,30 @@ exports.getCategories = function(done) {
         return done(rows);
     });
 };
+
+exports.uploadPhoto = function(venue_id, values, done) {
+    db.getPool().query("SELECT * FROM VenuePhoto WHERE venue_id = ?", venue_id, function(err, rows) {
+        if (err) return done(err);
+        if (rows == []) {
+            values[1] == 1;
+        }
+        db.getPool().query("INSERT INTO VenuePhoto (photo_filename, venue_id, photo_description, is_primary) VALUES (?, ?)", values, function(err, rows) {
+            if (err) return done(err);
+            return done(rows);
+        });
+    });
+};
+
+exports.resetOtherPrimary = function(venue_id, fileName, done) {
+    db.getPool().query("UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ? AND photo_filename != ?", [[venue_id], [fileName]], function(err, rows) {
+        if (err) return done(err);
+        return done(rows);
+    })
+};
+
+exports.checkVenueExists = function(venue_id, done) {
+    db.getPool().query("SELECT * FROM Venue WHERE venue_id = ?", venue_id, function(err, rows) {
+        if (err) return done(err);
+        return done(rows);
+    });
+};
