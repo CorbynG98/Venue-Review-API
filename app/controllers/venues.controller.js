@@ -333,60 +333,59 @@ exports.createPhoto = function(req, res) {
     if (user_data["description"] == undefined) user_data["description"] = req.body["description\n"];
     if (user_data["is_primary"] == undefined) user_data["is_primary"] = req.body["makePrimary\n"];
 
-    authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
-        if (authResult == null || authResult == "" || authResult == []) {
-            res.status(401);
-            res.json("Unauthorized");
-            return;
-        } else if (authResult[0].venue_id != venue_id) {
-            res.status(403);
-            res.json("Forbidden");
+    Venues.checkVenueExists(venue_id, function(result) {
+        if (result == "" || result == []) {
+            res.status(404);
+            res.json("Not Found");
             return;
         }
+        authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+            if (authResult == null || authResult == "" || authResult == []) {
+                res.status(401);
+                res.json("Unauthorized");
+                return;
+            } else if (authResult[0].venue_id != venue_id) {
+                res.status(403);
+                res.json("Forbidden");
+                return;
+            }
 
-        for (let item in user_data) {
-            if (user_data[item] == undefined) {
+            for (let item in user_data) {
+                if (user_data[item] == undefined) {
+                    res.status(400);
+                    res.json("Bad Request");
+                    return;
+                }
+            }
+            if (user_data["description"] == "") {
                 res.status(400);
                 res.json("Bad Request");
                 return;
             }
-        }
-        if (user_data["description"] == "") {
-            res.status(400);
-            res.json("Bad Request");
-            return;
-        }
-        if (!["true", "false"].includes(user_data["is_primary"])) {
-            res.status(400);
-            res.json("Bad Request");
-            return;
-        }
-
-        let imageDIR = "./storage/";
-        if (!fs.existsSync(imageDIR)) {
-            fs.mkdirSync(imageDIR);
-        }
-        imageDIR += "photos/";
-        if (!fs.existsSync(imageDIR)) {
-            fs.mkdirSync(imageDIR);
-        }
-        imageDIR += "venues/";
-        if (!fs.existsSync(imageDIR)) {
-            fs.mkdirSync(imageDIR);
-        }
-
-        let imageExt = "." + file.mimetype.split("/")[1];
-        let fileName = uuidv1().replace(/-/g, "") + imageExt;
-
-        let filePath = imageDIR + fileName;
-
-
-        Venues.checkVenueExists(venue_id, function(result) {
-            if (result == "" || result == []) {
-                res.status(404);
-                res.json("Not Found");
+            if (!["true", "false"].includes(user_data["is_primary"])) {
+                res.status(400);
+                res.json("Bad Request");
                 return;
             }
+
+            let imageDIR = "./storage/";
+            if (!fs.existsSync(imageDIR)) {
+                fs.mkdirSync(imageDIR);
+            }
+            imageDIR += "photos/";
+            if (!fs.existsSync(imageDIR)) {
+                fs.mkdirSync(imageDIR);
+            }
+            imageDIR += "venues/";
+            if (!fs.existsSync(imageDIR)) {
+                fs.mkdirSync(imageDIR);
+            }
+
+            let imageExt = "." + file.mimetype.split("/")[1];
+            let fileName = uuidv1().replace(/-/g, "") + imageExt;
+
+            let filePath = imageDIR + fileName;
+
             fs.writeFile(filePath, file.buffer, "utf8", function (err) {
                 if (err) {
                     console.log(err);
