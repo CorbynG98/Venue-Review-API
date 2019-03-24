@@ -326,9 +326,11 @@ exports.createPhoto = function(req, res) {
     let file = req.file;
     let venue_id = req.params.id;
     let user_data = {
-        "description": req.body["description"],
-        "is_primary": req.body["makePrimary"]
+        "description": req.body["description\n"],
+        "is_primary": req.body["makePrimary\n"]
     };
+
+    console.log(req.body);
 
     authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
         console.log(venue_id);
