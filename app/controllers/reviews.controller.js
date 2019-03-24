@@ -82,7 +82,8 @@ exports.create = function(req, res) {
         "venue_id": req.params.id,
         "review_body": req.body.reviewBody,
         "star_rating": req.body.starRating,
-        "cost_rating": req.body.costRating
+        "cost_rating": req.body.costRating,
+        "time_posted": new Date()
     };
 
     authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
@@ -100,7 +101,7 @@ exports.create = function(req, res) {
             user_data.review_author_id = authResult[0].user_id;
 
             for (let item in user_data) {
-                if (user_data[item] == undefined || user_data[item] == "") {
+                if (user_data[item] == undefined) {
                     res.status(400);
                     res.json("Bad Request");
                     return;
@@ -110,7 +111,7 @@ exports.create = function(req, res) {
                     res.json("Bad Request");
                     return;
                 }
-                if (user_data["star_rating"] % 1 != 0 || user_data["star_rating"] < 0 || user_data["star_rating"] > 5) {
+                if (user_data["star_rating"] % 1 != 0 || user_data["star_rating"] < 1 || user_data["star_rating"] > 5) {
                     res.status(400);
                     res.json("Bad Request");
                     return;
@@ -118,11 +119,14 @@ exports.create = function(req, res) {
             }
 
             let values = [
-                [user_data["venue_id"],
-                user_data["review_body"],
-                user_data["star_rating"],
-                user_data["cost_rating"],
-                user_data["review_author_id"]]
+                [
+                    user_data["venue_id"],
+                    user_data["review_body"],
+                    user_data["star_rating"],
+                    user_data["cost_rating"],
+                    user_data["time_posted"],
+                    user_data["review_author_id"]
+                ]
             ];
 
             Reviews.insert(user_data["venue_id"], values, function(result) {

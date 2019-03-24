@@ -21,7 +21,7 @@ exports.insert = function(venue_id, values, done) {
     db.getPool().query("SELECT * FROM Venue WHERE venue_id = ?", venue_id, function(err, rows) {
         if (err) return done(err);
         if (rows == "" || rows == null || rows == []) return done(null);
-        db.getPool().query("INSERT INTO Review (reviewed_venue_id, review_body, star_rating, cost_rating, review_author_id) VALUES (?)", values, function(err, rows) {
+        db.getPool().query("INSERT INTO Review (reviewed_venue_id, review_body, star_rating, cost_rating, time_posted, review_author_id) VALUES (?)", values, function(err, rows) {
             if (err) return done(err);
             return done(rows);
         });
