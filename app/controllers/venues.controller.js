@@ -326,13 +326,13 @@ exports.createPhoto = function(req, res) {
     let file = req.file;
     let venue_id = req.params.id;
     let user_data = {
-        "description": req.body["description\n"],
-        "is_primary": req.body["makePrimary\n"]
+        "description": req.body["description"],
+        "is_primary": req.body["makePrimary"]
     };
 
-    let imageExt = "." + file.mimetype.split("/")[1];
-
     authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+        console.log(venue_id);
+        console.log(authResult);
         if (authResult == null || authResult == "" || authResult == []) {
             res.status(401);
             res.json("Unauthorized");
@@ -374,6 +374,7 @@ exports.createPhoto = function(req, res) {
             fs.mkdirSync(imageDIR);
         }
 
+        let imageExt = "." + file.mimetype.split("/")[1];
         let fileName = uuidv1().replace(/-/g, "") + imageExt;
 
         let filePath = imageDIR + fileName;
