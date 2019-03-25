@@ -102,10 +102,37 @@ exports.checkVenueExists = function(venue_id, done) {
     });
 };
 
+exports.checkVenueAndPhotoExists = function(venue_id, filename, done) {
+    db.getPool().query("SELECT * FROM Venue RIGHT JOIN VenuePhoto ON Venue.venue_id = VenuePhoto.venue_id WHERE Venue.venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, rows) {
+        if (err) return done(err);
+        if (rows == "" || rows == []) return done(null);
+        return done(rows);
+    })
+};
+
 exports.getPhotoByFilename = function(venue_id, filename, done) {
     db.getPool().query("SELECT photo_filename FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, rows) {
         if (err) return done(err);
-        if (rows == null || rows == "" || rows == []) return done(null);
+        if (rows == "" || rows == []) return done(null);
         return done(rows);
+    });
+};
+
+exports.removePhoto = function(venue_id, filename, done) {
+    db.getPool().query("SELECT * FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, photo) {
+        if (err) return done(err);
+        if (photo == []) return done(null);
+        db.getPool().query("DELETE FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function (err, rows) {
+            if (photo[0].is_primary == 1) {
+                db.getPool().query("SELECT * FROM VenuePhoto WHERE venue_id = ? LIMIT 1", venue_id, function (err, rows) {
+                    if (err) return done(err);
+                    if (rows == "" || rows == []) return done(true);
+                    db.getPool().query("UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? AND photo_filename = ?", [[rows[0].venue_id], [rows[0].photo_filename]], function (err, result) {
+                        console.log(result);
+                    });
+                });
+            }
+            return done(rows);
+        });
     });
 };

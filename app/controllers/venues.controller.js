@@ -436,3 +436,42 @@ exports.getPhotoByFilename = function (req, res) {
         return;
     });
 };
+
+exports.removePhoto = function(req, res) {
+    let venue_id = req.params.id;
+    let filename = req.params.photoFilename;
+
+    Venues.checkVenueAndPhotoExists(venue_id, filename, function(result) {
+        if (result == null || result[0] == null) {
+            res.status(404);
+            res.json("Not Found");
+            return;
+        }
+        authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+            if (authResult == null || authResult == "" || authResult == []) {
+                res.status(401);
+                res.json("Unauthorized");
+                return;
+            } else if (authResult[0].venue_id != venue_id) {
+                res.status(403);
+                res.json("Forbidden");
+                return;
+            }
+            Venues.getPhotoByFilename(venue_id, filename, function (result) {
+                let imageFile = "./photos/venues/" + result[0].photo_filename;
+                fs.unlink(imageFile, function (err, data) {
+                    if (err) {
+                        res.status(404);
+                        res.json("Not Found");
+                        return;
+                    }
+                    Venues.removePhoto(venue_id, filename, function (result) {
+                        res.status(200);
+                        res.json("OK");
+                        return;
+                    });
+                });
+            });
+        });
+    });
+};

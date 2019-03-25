@@ -16,6 +16,7 @@ module.exports = function (app) {
         .post(venues.createPhoto);
 
     app.route(app.rootUrl + "/venues/:id/photos/:photoFilename")
-        .get(venues.getPhotoByFilename);
+        .get(venues.getPhotoByFilename)
+        .delete(venues.removePhoto);
 
 };
