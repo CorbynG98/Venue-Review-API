@@ -19,4 +19,7 @@ module.exports = function (app) {
         .get(venues.getPhotoByFilename)
         .delete(venues.removePhoto);
 
+    app.route(app.rootUrl + "/venues/:id/photos/:photoFilename/setPrimary")
+        .post(venues.setNewPrimary);
+
 };

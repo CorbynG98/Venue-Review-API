@@ -119,20 +119,29 @@ exports.getPhotoByFilename = function(venue_id, filename, done) {
 };
 
 exports.removePhoto = function(venue_id, filename, done) {
-    db.getPool().query("SELECT * FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, photo) {
+    db.getPool().query("SELECT is_primary FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, photo) {
         if (err) return done(err);
         if (photo == []) return done(null);
         db.getPool().query("DELETE FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function (err, rows) {
-            if (photo[0].is_primary == 1) {
-                db.getPool().query("SELECT * FROM VenuePhoto WHERE venue_id = ? LIMIT 1", venue_id, function (err, rows) {
-                    if (err) return done(err);
-                    if (rows == "" || rows == []) return done(true);
-                    db.getPool().query("UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? AND photo_filename = ?", [[rows[0].venue_id], [rows[0].photo_filename]], function (err, result) {
-                        console.log(result);
-                    });
-                });
-            }
-            return done(rows);
+            if (err) return done(err);
+            return done(photo);
+        });
+    });
+};
+
+exports.randomNewPrimary = function(venue_id, done) {
+    db.getPool().query("SELECT * FROM VenuePhoto WHERE venue_id = ? LIMIT 1", venue_id, function (err, rows) {
+        if (err) return done(err);
+        if (rows == "" || rows == []) return done(true);
+        db.getPool().query("UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? AND photo_filename = ?", [[rows[0].venue_id], [rows[0].photo_filename]], function (err, result) {});
+    });
+};
+
+exports.setNewPrimary = function(venue_id, filename, done) {
+    db.getPool().query("UPDATE VenuePhoto SET is_primary = 0 WHERE venue_id = ?", venue_id, function (err, rows) {
+        if (err) return done(err);
+        db.getPool().query("UPDATE VenuePhoto SET is_primary = 1 WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function (err, result) {
+            return done(true);
         });
     });
 };

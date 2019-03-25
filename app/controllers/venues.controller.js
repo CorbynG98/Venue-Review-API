@@ -341,6 +341,12 @@ exports.createPhoto = function(req, res) {
     if (user_data["description"] == undefined) user_data["description"] = req.body["description\n"];
     if (user_data["is_primary"] == undefined) user_data["is_primary"] = req.body["makePrimary\n"];
 
+    if (file == undefined){
+        res.status(400);
+        res.json("Bad Request");
+        return;
+    }
+
     Venues.checkVenueExists(venue_id, function(result) {
         if (result == "" || result == []) {
             res.status(404);
@@ -389,8 +395,6 @@ exports.createPhoto = function(req, res) {
             let fileName = uuidv1().replace(/-/g, "") + imageExt;
 
             let filePath = imageDIR + fileName;
-
-            console.log(filePath);
 
             fs.writeFile(filePath, file.buffer, "utf8", function (err) {
                 if (err) {
@@ -466,11 +470,42 @@ exports.removePhoto = function(req, res) {
                         return;
                     }
                     Venues.removePhoto(venue_id, filename, function (result) {
+                        if (result[0].is_primary == 1) {
+                            Venues.randomNewPrimary(venue_id, function(result) {})
+                        }
                         res.status(200);
                         res.json("OK");
                         return;
                     });
                 });
+            });
+        });
+    });
+};
+
+exports.setNewPrimary = function(req, res) {
+    let venue_id = req.params.id;
+    let filename = req.params.photoFilename;
+
+    Venues.checkVenueAndPhotoExists(venue_id, filename, function(result) {
+        if (result == null || result[0] == null) {
+            res.status(404);
+            res.json("Not Found");
+            return;
+        }
+        authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+            if (authResult == null || authResult == "" || authResult == []) {
+                res.status(401);
+                res.json("Unauthorized");
+                return;
+            } else if (authResult[0].venue_id != venue_id) {
+                res.status(403);
+                res.json("Forbidden");
+                return;
+            }
+            Venues.setNewPrimary(venue_id, filename, function(result) {
+                res.status(200);
+                res.json("OK");
             });
         });
     });
