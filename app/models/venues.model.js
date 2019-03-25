@@ -101,3 +101,11 @@ exports.checkVenueExists = function(venue_id, done) {
         return done(rows);
     });
 };
+
+exports.getPhotoByFilename = function(venue_id, filename, done) {
+    db.getPool().query("SELECT photo_filename FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, result) {
+        if (err) return done(err);
+        if (result == null || reslut == "" || result == []) return done(null);
+        return done(result);
+    });
+};

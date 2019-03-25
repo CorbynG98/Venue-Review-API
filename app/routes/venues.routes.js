@@ -14,4 +14,8 @@ module.exports = function (app) {
 
     app.route(app.rootUrl + "/venues/:id/photos")
         .post(venues.createPhoto);
+
+    app.route(app.rootUrl + "/venues/:id/photos/:photoFilename")
+        .get(venues.getPhotoByFilename);
+
 };

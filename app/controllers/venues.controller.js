@@ -414,3 +414,19 @@ exports.createPhoto = function(req, res) {
         });
     });
 };
+
+exports.getPhotoByFilename = function (req, res) {
+    let venue_id = req.params.id;
+    let filename = req.params.photoFilename;
+    Venues.getPhotoByFilename(venue_id, filename, function(result) {
+        if (result == null) {
+            res.status(404);
+            res.json("Not Found");
+            return;
+        }
+        let imageFile = "./storage/photos/venues/" + result[0].photo_filename;
+        res.status(200);
+        res.sendFile(path.resolve(imageFile));
+        return;
+    });
+};
