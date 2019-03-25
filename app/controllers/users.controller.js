@@ -236,7 +236,7 @@ exports.getPhoto = function (req, res) {
             res.json("Not Found");
             return;
         }
-        let imageFile = "./storage/photos/" + result[0].profile_photo_filename;
+        let imageFile = "./photos/users/" + result[0].profile_photo_filename;
         res.status(200);
         res.sendFile(path.resolve(imageFile));
         return;
@@ -269,11 +269,11 @@ exports.uploadPhoto = function (req, res) {
                 res.json("Forbidden");
                 return;
             }
-            let imageDIR = "./storage/";
+            let imageDIR = "./photos/";
             if (!fs.existsSync(imageDIR)) {
                 fs.mkdirSync(imageDIR);
             }
-            imageDIR += "photos/";
+            imageDIR += "users/";
             if (!fs.existsSync(imageDIR)) {
                 fs.mkdirSync(imageDIR);
             }
@@ -323,7 +323,7 @@ exports.removePhoto = function (req, res) {
                     res.json("Not Found");
                     return;
                 }
-                let imageFile = "./storage/photos/" + result[0].profile_photo_filename;
+                let imageFile = "./photos/users/" + result[0].profile_photo_filename;
                 fs.unlink(imageFile, function (err, data) {
                     if (err) {
                         res.status(404);

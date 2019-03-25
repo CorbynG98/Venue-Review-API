@@ -2,7 +2,7 @@ const db = require('../../config/db');
 
 exports.get = function(values, done) {
     // let modeCostRating = "(SELECT mode_cost_rating FROM ModeCostRating JOIN Venue ON ModeCostRating.venue_id = Venue.venue_id ORDER BY occurrences DESC LIMIT 1)";
-    let primaryPhoto = "(SELECT photo_filename FROM Venue JOIN VenuePhoto ON Venue.venue_id = VenuePhoto.venue_id WHERE is_primary = 1)";
+    let primaryPhoto = "(SELECT photo_filename FROM Venue JOIN VenuePhoto ON Venue.venue_id = VenuePhoto.venue_id WHERE is_primary = 1 AND VenuePhoto.venue_id = venueId)";
     let query = `SELECT Venue.venue_id as venueId, venue_name as venueName, category_id as categoryId, city, short_description as shortDescription, latitude, longitude, AVG(star_rating) as meanStartRating, mode_cost_rating as modeCostRating, ${primaryPhoto} as primaryPhoto ${values[0]} ` +
         ` FROM Venue` +
         ` LEFT JOIN Review ON Venue.venue_id = Review.reviewed_venue_id LEFT JOIN ModeCostRating ON ModeCostRating.venue_id = Venue.venue_id` +
@@ -78,8 +78,8 @@ exports.getCategories = function(done) {
 exports.uploadPhoto = function(venue_id, values, done) {
     db.getPool().query("SELECT * FROM VenuePhoto WHERE venue_id = ?", venue_id, function(err, rows) {
         if (err) return done(err);
-        if (rows == []) {
-            values[1] == 1;
+        if (rows == [] || rows == "") {
+            values[1] = 1;
         }
         db.getPool().query("INSERT INTO VenuePhoto (photo_filename, venue_id, photo_description, is_primary) VALUES (?, ?)", values, function(err, rows) {
             if (err) return done(err);

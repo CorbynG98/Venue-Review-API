@@ -136,6 +136,7 @@ exports.getById = function(req, res) {
             return;
         }
         let endIndex = result.length;
+        console.log(result);
         if (user_data["count"] != undefined) {
             if (parseInt(user_data["count"]) < endIndex) {
                 endIndex = parseInt(user_data["count"]);
@@ -248,6 +249,13 @@ exports.getOne = function(req, res) {
             res.status(404);
             res.json("Not Found");
             return;
+        }
+        for (let i = 0; i < result.photos.length; i++) {
+            if (result.photos[i].isPrimary == 1) {
+                result.photos[i].isPrimary = true;
+            } else {
+                result.photos[i].isPrimary = false;
+            }
         }
         res.status(200);
         res.json(result);
@@ -368,11 +376,7 @@ exports.createPhoto = function(req, res) {
                 return;
             }
 
-            let imageDIR = "./storage/";
-            if (!fs.existsSync(imageDIR)) {
-                fs.mkdirSync(imageDIR);
-            }
-            imageDIR += "photos/";
+            let imageDIR = "./photos/";
             if (!fs.existsSync(imageDIR)) {
                 fs.mkdirSync(imageDIR);
             }
@@ -385,6 +389,8 @@ exports.createPhoto = function(req, res) {
             let fileName = uuidv1().replace(/-/g, "") + imageExt;
 
             let filePath = imageDIR + fileName;
+
+            console.log(filePath);
 
             fs.writeFile(filePath, file.buffer, "utf8", function (err) {
                 if (err) {
@@ -424,7 +430,7 @@ exports.getPhotoByFilename = function (req, res) {
             res.json("Not Found");
             return;
         }
-        let imageFile = "./storage/photos/venues/" + result[0].photo_filename;
+        let imageFile = "./photos/venues/" + result[0].photo_filename;
         res.status(200);
         res.sendFile(path.resolve(imageFile));
         return;
