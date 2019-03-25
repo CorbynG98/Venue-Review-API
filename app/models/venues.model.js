@@ -103,9 +103,9 @@ exports.checkVenueExists = function(venue_id, done) {
 };
 
 exports.getPhotoByFilename = function(venue_id, filename, done) {
-    db.getPool().query("SELECT photo_filename FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, result) {
+    db.getPool().query("SELECT photo_filename FROM VenuePhoto WHERE venue_id = ? AND photo_filename = ?", [[venue_id], [filename]], function(err, rows) {
         if (err) return done(err);
-        if (result == null || reslut == "" || result == []) return done(null);
-        return done(result);
+        if (rows == null || rows == "" || rows == []) return done(null);
+        return done(rows);
     });
 };
