@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require('path');
 const uuidv1 = require("uuid/v1");
 
-exports.getById = function(req, res) {
+exports.getById = function (req, res) {
     let user_data = {
         "startIndex": req.query.startIndex,
         "count": req.query.count,
@@ -25,7 +25,7 @@ exports.getById = function(req, res) {
 
     // set defaults if they weren't defined
     if (user_data["sortBy"] == undefined) user_data["sortBy"] = "STAR_RATING";
-    if (user_data["reverseSort"] == undefined)  {
+    if (user_data["reverseSort"] == undefined) {
         user_data["reverseSort"] = false;
     } else {
         user_data["reverseSort"] = user_data["reverseSort"] === "true";
@@ -94,7 +94,7 @@ exports.getById = function(req, res) {
 
             // Add the part to the query
             if (key == "sortBy") {
-                if (user_data[key] == "STAR_RATING")  orderClaus = "ORDER BY AVG(star_rating)";
+                if (user_data[key] == "STAR_RATING") orderClaus = "ORDER BY AVG(star_rating)";
                 else if (user_data[key] == "COST_RATING") orderClaus = "ORDER BY AVG(cost_rating)";
                 else if (user_data[key] == "DISTANCE") {
                     orderClaus = "ORDER BY DISTANCE";
@@ -129,14 +129,13 @@ exports.getById = function(req, res) {
         [havingClaus]
     ];
 
-    Venues.get(values, function(result) {
+    Venues.get(values, function (result) {
         if (parseInt(user_data["startIndex"]) > result.length - 1 || result.length == 0) {
             res.status(200);
             res.json([]);
             return;
         }
         let endIndex = result.length;
-        console.log(result);
         if (user_data["count"] != undefined) {
             if (parseInt(user_data["count"]) < endIndex) {
                 endIndex = parseInt(user_data["count"]);
@@ -148,7 +147,7 @@ exports.getById = function(req, res) {
     });
 };
 
-exports.create = function(req, res) {
+exports.create = function (req, res) {
     let user_data = {
         "venue_name": req.body.venueName,
         "category_id": req.body.categoryId,
@@ -160,7 +159,7 @@ exports.create = function(req, res) {
         "longitude": req.body.longitude,
     };
 
-    authCheck.checkUserAuth(req.headers["x-authorization"], function(authResult) {
+    authCheck.checkUserAuth(req.headers["x-authorization"], function (authResult) {
         if (authResult == null) {
             res.status(401);
             res.json("Unauthorized");
@@ -224,7 +223,7 @@ exports.create = function(req, res) {
             date
         ]];
 
-        Venues.insert(values, function(result) {
+        Venues.insert(values, function (result) {
             if (result == null) {
                 res.status(400);
                 res.json("Bad Request");
@@ -237,14 +236,14 @@ exports.create = function(req, res) {
     });
 };
 
-exports.getOne = function(req, res) {
+exports.getOne = function (req, res) {
     let venue_id = req.params.id;
 
     let values = [
         [venue_id]
     ];
 
-    Venues.getById(values, function(result) {
+    Venues.getById(values, function (result) {
         if (result == null) {
             res.status(404);
             res.json("Not Found");
@@ -262,7 +261,7 @@ exports.getOne = function(req, res) {
     });
 };
 
-exports.update = function(req, res) {
+exports.update = function (req, res) {
     let venue_id = req.params.id;
 
     let user_data = {
@@ -278,7 +277,7 @@ exports.update = function(req, res) {
 
     let queryPart = "";
 
-    authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+    authCheck.checkVenueAuth(req.headers["x-authorization"], function (authResult) {
         if (authResult == null) {
             res.status(401);
             res.json("Unauthorized");
@@ -310,7 +309,7 @@ exports.update = function(req, res) {
             [venue_id]
         ];
 
-        Venues.alter(values, function(result) {
+        Venues.alter(values, function (result) {
             if (result == null) {
                 res.status(404);
                 res.json("Not Found");
@@ -323,14 +322,14 @@ exports.update = function(req, res) {
     });
 };
 
-exports.getCategories = function(req, res) {
-    Venues.getCategories(function(result) {
+exports.getCategories = function (req, res) {
+    Venues.getCategories(function (result) {
         res.status(200);
         res.json(result);
     });
 };
 
-exports.createPhoto = function(req, res) {
+exports.createPhoto = function (req, res) {
     let file = req.file;
     let venue_id = req.params.id;
     let user_data = {
@@ -341,19 +340,19 @@ exports.createPhoto = function(req, res) {
     if (user_data["description"] == undefined) user_data["description"] = req.body["description\n"];
     if (user_data["is_primary"] == undefined) user_data["is_primary"] = req.body["makePrimary\n"];
 
-    if (file == undefined){
+    if (file == undefined) {
         res.status(400);
         res.json("Bad Request");
         return;
     }
 
-    Venues.checkVenueExists(venue_id, function(result) {
+    Venues.checkVenueExists(venue_id, function (result) {
         if (result == "" || result == []) {
             res.status(404);
             res.json("Not Found");
             return;
         }
-        authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+        authCheck.checkVenueAuth(req.headers["x-authorization"], function (authResult) {
             if (authResult == null || authResult == "" || authResult == []) {
                 res.status(401);
                 res.json("Unauthorized");
@@ -414,7 +413,7 @@ exports.createPhoto = function(req, res) {
 
                 Venues.uploadPhoto(venue_id, values, function (result) {
                     if (values[1] == 1) {
-                        Venues.resetOtherPrimary(venue_id, fileName, function(result) {});
+                        Venues.resetOtherPrimary(venue_id, fileName, function (result) { });
                     }
                     res.status(201);
                     res.json("Created");
@@ -428,7 +427,7 @@ exports.createPhoto = function(req, res) {
 exports.getPhotoByFilename = function (req, res) {
     let venue_id = req.params.id;
     let filename = req.params.photoFilename;
-    Venues.getPhotoByFilename(venue_id, filename, function(result) {
+    Venues.getPhotoByFilename(venue_id, filename, function (result) {
         if (result == null) {
             res.status(404);
             res.json("Not Found");
@@ -441,17 +440,17 @@ exports.getPhotoByFilename = function (req, res) {
     });
 };
 
-exports.removePhoto = function(req, res) {
+exports.removePhoto = function (req, res) {
     let venue_id = req.params.id;
     let filename = req.params.photoFilename;
 
-    Venues.checkVenueAndPhotoExists(venue_id, filename, function(result) {
+    Venues.checkVenueAndPhotoExists(venue_id, filename, function (result) {
         if (result == null || result[0] == null) {
             res.status(404);
             res.json("Not Found");
             return;
         }
-        authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+        authCheck.checkVenueAuth(req.headers["x-authorization"], function (authResult) {
             if (authResult == null || authResult == "" || authResult == []) {
                 res.status(401);
                 res.json("Unauthorized");
@@ -471,7 +470,7 @@ exports.removePhoto = function(req, res) {
                     }
                     Venues.removePhoto(venue_id, filename, function (result) {
                         if (result[0].is_primary == 1) {
-                            Venues.randomNewPrimary(venue_id, function(result) {})
+                            Venues.randomNewPrimary(venue_id, function (result) { })
                         }
                         res.status(200);
                         res.json("OK");
@@ -483,17 +482,17 @@ exports.removePhoto = function(req, res) {
     });
 };
 
-exports.setNewPrimary = function(req, res) {
+exports.setNewPrimary = function (req, res) {
     let venue_id = req.params.id;
     let filename = req.params.photoFilename;
 
-    Venues.checkVenueAndPhotoExists(venue_id, filename, function(result) {
+    Venues.checkVenueAndPhotoExists(venue_id, filename, function (result) {
         if (result == null || result[0] == null) {
             res.status(404);
             res.json("Not Found");
             return;
         }
-        authCheck.checkVenueAuth(req.headers["x-authorization"], function(authResult) {
+        authCheck.checkVenueAuth(req.headers["x-authorization"], function (authResult) {
             if (authResult == null || authResult == "" || authResult == []) {
                 res.status(401);
                 res.json("Unauthorized");
@@ -503,7 +502,7 @@ exports.setNewPrimary = function(req, res) {
                 res.json("Forbidden");
                 return;
             }
-            Venues.setNewPrimary(venue_id, filename, function(result) {
+            Venues.setNewPrimary(venue_id, filename, function (result) {
                 res.status(200);
                 res.json("OK");
             });

@@ -44,7 +44,7 @@ async function populateDefaultUsers() {
 
     // Shallow copy all the user arrays within the main data array
     // Ensures that the user arrays with hashed passwords won't persist across multiple calls to this function
-    usersData = usersData.map(user => ([ ...user ]));
+    usersData = usersData.map(user => ([...user]));
 
     const passwordIndex = properties.indexOf('password');
     await Promise.all(usersData.map(user => changePasswordToHash(user, passwordIndex)));
