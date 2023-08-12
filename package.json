@@ -7,11 +7,11 @@
   },
   "dependencies": {
     "async-waterfall": "^0.1.5",
-    "bcrypt": "^3.0.4",
     "body-parser": "^1.18.3",
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "multer": "^1.4.1",
+    "mysql2": "^3.6.0",
     "mz": "^2.7.0",
     "promise-mysql": "^3.3.1",
     "uuid": "^3.3.2"
