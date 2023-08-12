@@ -1,0 +1,79 @@
+name: Venue Review GCP Cloud Run Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  REGISTRY: us-central1-docker.pkg.dev
+  IMAGE_NAME: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}/renuve.review.api
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - id: 'auth'
+      name: "Authenticate Google Cloud"
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: 'projects/473772735791/locations/global/workloadIdentityPools/github-actions/providers/personal-identity-pool-github'
+        service_account: github-actions@venue-review-seng365.iam.gserviceaccount.com
+
+    - name: Configure Google Cloud
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: Configure Docker
+      run: gcloud auth configure-docker --quiet $REGISTRY
+
+    - name: 'Create env file'
+      run: |
+        rm -rf .env
+        touch .env
+        echo MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} >> .env
+        echo MYSQL_HOST=${{ secrets.MYSQL_HOST }} >> .env
+        echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
+        echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
+        cat .env
+
+    - name: Build Docker Image
+      run: docker build -f ./Dockerfile -t $IMAGE_NAME .
+
+    - name: Push Docker Image
+      run: docker push $IMAGE_NAME
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - id: 'auth'
+      name: "Authenticate Google Cloud"
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: 'projects/473772735791/locations/global/workloadIdentityPools/github-actions/providers/personal-identity-pool-github'
+        service_account: github-actions@venue-review-seng365.iam.gserviceaccount.com
+
+    - name: Configure Google Cloud
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: Deploy Docker Image
+      run: gcloud run deploy venue-review-api --image $IMAGE_NAME --region us-central1 --platform managed --port 4941
