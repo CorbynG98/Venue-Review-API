@@ -1045,7 +1045,7 @@
 		{
 			"id": "059ea743-b6c7-4cb2-b257-7b3a8a061382",
 			"key": "BASE_URL",
-			"value": "localhost:4941/api/v1",
+			"value": "localhost:443/api/v1",
 			"type": "string"
 		}
 	]
