@@ -1,6 +1,10 @@
 name: Venue Review GCP Cloud Run Deploy
 
 on:
+  workflow_dispatch:
+    inputs:
+      name:
+        default: "Manual Trigger"
   push:
     branches: [ main ]
 
